@@ -6,10 +6,9 @@ COPY package.json ./
 COPY bun.lockb* ./
 
 RUN bun install
-RUN bun add -d nodemon
 
 COPY . .
 
-EXPOSE 5000
+EXPOSE 3000
 
-CMD ["bun", "run", "dev"]
+CMD ["bun", "run", "dev", "--host", "0.0.0.0"]
