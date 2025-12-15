@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  kripto2_db:
+    container_name: kripto2_db
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: kripto2_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - Kripto2
+    restart: unless-stopped
+
+  kripto2_be:
+    container_name: kripto2_be
+    build: ./backend
+    working_dir: /app
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      PORT: 5000
+      NODE_ENV: development
+      DB_URL: postgres://postgres:password@kripto2_db:5432/kripto2_db
+    networks:
+      - Kripto2
+
+volumes:
+  postgres_data:
+
+networks:
+  Kripto2:
+    driver: bridge
