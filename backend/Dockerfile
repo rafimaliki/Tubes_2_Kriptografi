@@ -8,7 +8,7 @@ COPY bun.lockb* ./
 RUN bun install
 RUN bun add -d nodemon
 
-COPY . .
+# Don't COPY source code - it will be mounted via volume
 
 EXPOSE 5000
 

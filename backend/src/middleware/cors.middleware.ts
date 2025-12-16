@@ -1,7 +1,10 @@
 import type { Context, Next } from "hono";
 
 export const corsMiddleware = async (c: Context, next: Next) => {
-  c.header("Access-Control-Allow-Origin", "*");
+  const origin = c.req.header("origin") || "http://localhost:3000";
+
+  c.header("Access-Control-Allow-Origin", origin);
+  c.header("Access-Control-Allow-Credentials", "true");
   c.header(
     "Access-Control-Allow-Methods",
     "GET, POST, PUT, DELETE, PATCH, OPTIONS"
