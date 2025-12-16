@@ -9,104 +9,104 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as LoginIndexRouteImport } from './routes/login/index'
-import { Route as CertificatesIndexRouteImport } from './routes/certificates/index'
-import { Route as CertificatesIdIndexRouteImport } from './routes/certificates/$id/index'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as CertificatesRouteImport } from './routes/certificates'
+import { Route as SplatRouteImport } from './routes/$'
+import { Route as CertificateIdRouteImport } from './routes/certificate.$id'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LoginIndexRoute = LoginIndexRouteImport.update({
-  id: '/login/',
-  path: '/login/',
+const CertificatesRoute = CertificatesRouteImport.update({
+  id: '/certificates',
+  path: '/certificates',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CertificatesIndexRoute = CertificatesIndexRouteImport.update({
-  id: '/certificates/',
-  path: '/certificates/',
+const SplatRoute = SplatRouteImport.update({
+  id: '/$',
+  path: '/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CertificatesIdIndexRoute = CertificatesIdIndexRouteImport.update({
-  id: '/certificates/$id/',
-  path: '/certificates/$id/',
+const CertificateIdRoute = CertificateIdRouteImport.update({
+  id: '/certificate/$id',
+  path: '/certificate/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/certificates': typeof CertificatesIndexRoute
-  '/login': typeof LoginIndexRoute
-  '/certificates/$id': typeof CertificatesIdIndexRoute
+  '/$': typeof SplatRoute
+  '/certificates': typeof CertificatesRoute
+  '/login': typeof LoginRoute
+  '/certificate/$id': typeof CertificateIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/certificates': typeof CertificatesIndexRoute
-  '/login': typeof LoginIndexRoute
-  '/certificates/$id': typeof CertificatesIdIndexRoute
+  '/$': typeof SplatRoute
+  '/certificates': typeof CertificatesRoute
+  '/login': typeof LoginRoute
+  '/certificate/$id': typeof CertificateIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/certificates/': typeof CertificatesIndexRoute
-  '/login/': typeof LoginIndexRoute
-  '/certificates/$id/': typeof CertificatesIdIndexRoute
+  '/$': typeof SplatRoute
+  '/certificates': typeof CertificatesRoute
+  '/login': typeof LoginRoute
+  '/certificate/$id': typeof CertificateIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/certificates' | '/login' | '/certificates/$id'
+  fullPaths: '/$' | '/certificates' | '/login' | '/certificate/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/certificates' | '/login' | '/certificates/$id'
-  id: '__root__' | '/' | '/certificates/' | '/login/' | '/certificates/$id/'
+  to: '/$' | '/certificates' | '/login' | '/certificate/$id'
+  id: '__root__' | '/$' | '/certificates' | '/login' | '/certificate/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  CertificatesIndexRoute: typeof CertificatesIndexRoute
-  LoginIndexRoute: typeof LoginIndexRoute
-  CertificatesIdIndexRoute: typeof CertificatesIdIndexRoute
+  SplatRoute: typeof SplatRoute
+  CertificatesRoute: typeof CertificatesRoute
+  LoginRoute: typeof LoginRoute
+  CertificateIdRoute: typeof CertificateIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login/': {
-      id: '/login/'
+    '/login': {
+      id: '/login'
       path: '/login'
       fullPath: '/login'
-      preLoaderRoute: typeof LoginIndexRouteImport
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/certificates/': {
-      id: '/certificates/'
+    '/certificates': {
+      id: '/certificates'
       path: '/certificates'
       fullPath: '/certificates'
-      preLoaderRoute: typeof CertificatesIndexRouteImport
+      preLoaderRoute: typeof CertificatesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/certificates/$id/': {
-      id: '/certificates/$id/'
-      path: '/certificates/$id'
-      fullPath: '/certificates/$id'
-      preLoaderRoute: typeof CertificatesIdIndexRouteImport
+    '/$': {
+      id: '/$'
+      path: '/$'
+      fullPath: '/$'
+      preLoaderRoute: typeof SplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/certificate/$id': {
+      id: '/certificate/$id'
+      path: '/certificate/$id'
+      fullPath: '/certificate/$id'
+      preLoaderRoute: typeof CertificateIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  CertificatesIndexRoute: CertificatesIndexRoute,
-  LoginIndexRoute: LoginIndexRoute,
-  CertificatesIdIndexRoute: CertificatesIdIndexRoute,
+  SplatRoute: SplatRoute,
+  CertificatesRoute: CertificatesRoute,
+  LoginRoute: LoginRoute,
+  CertificateIdRoute: CertificateIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

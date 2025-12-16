@@ -2,34 +2,21 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { mockCertificates } from "@/data/mock-certificates";
 import { UploadCertificateModal } from "@/components/upload-modal";
+import { useAuthStore } from "@/store/auth.store";
 
-export const Route = createFileRoute("/certificates/")({
+export const Route = createFileRoute("/certificates")({
   component: CertificatesPage,
 });
 
 function CertificatesPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const authStatus = localStorage.getItem("isAuthenticated");
-    if (authStatus !== "true") {
-      navigate({ to: "/login" });
-    } else {
-      setIsAuthenticated(true);
-    }
-  }, [navigate]);
-
   const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated");
-    console.log("User logged out");
+    useAuthStore.getState().logout();
+    console.log("Logged out successfully");
     navigate({ to: "/login" });
   };
-
-  if (!isAuthenticated) {
-    return null;
-  }
 
   return (
     <div className="h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex flex-col">
@@ -106,7 +93,7 @@ function CertificatesPage() {
             {mockCertificates.map((certificate) => (
               <Link
                 key={certificate.id}
-                to={`/certificates/$id`}
+                to={`/certificate/$id`}
                 params={{ id: certificate.id }}
                 className="block bg-slate-900/50 backdrop-blur-sm border border-slate-800 hover:border-slate-700 rounded-xl p-6 transition-all duration-200 hover:shadow-xl hover:shadow-blue-900/10"
               >

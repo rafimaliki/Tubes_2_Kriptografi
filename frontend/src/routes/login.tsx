@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import type { FormEvent } from "react";
+import { useAuthStore } from "@/store/auth.store";
 
-export const Route = createFileRoute("/login/")({
+export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
@@ -11,18 +11,21 @@ function LoginPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuthStore();
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
-    if (privateKey.trim() === "secure-cert-issuser-key") {
-      localStorage.setItem("isAuthenticated", "true");
-      navigate({ to: "/certificates" });
+    const result = await login(privateKey);
+
+    if (!result.ok) {
+      setError(result.error || "Login failed");
     } else {
-      setError("Invalid private key. Please try again.");
-      setIsLoading(false);
+      navigate({
+        to: "/certificates",
+      });
     }
   };
 

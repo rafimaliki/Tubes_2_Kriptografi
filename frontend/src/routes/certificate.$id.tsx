@@ -2,23 +2,21 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { mockCertificates } from "@/data/mock-certificates";
 import type { Certificate } from "@/data/mock-certificates";
+import { useAuthStore } from "@/store/auth.store";
 
-export const Route = createFileRoute("/certificates/$id/")({
+export const Route = createFileRoute("/certificate/$id")({
   component: CertificateDetailPage,
 });
 
 function CertificateDetailPage() {
   const { id } = Route.useParams();
+  const { authenticated } = useAuthStore();
+
   const [certificate, setCertificate] = useState<Certificate | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isRevoking, setIsRevoking] = useState(false);
 
   useEffect(() => {
-    const authStatus = localStorage.getItem("isAuthenticated");
-    setIsAuthenticated(authStatus === "true");
-
     const cert = mockCertificates.find((c) => c.id === id);
-    console.log("Loaded certificate:", id);
     setCertificate(cert || null);
   }, [id]);
 
@@ -71,7 +69,7 @@ function CertificateDetailPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
       {/* Header */}
-      {isAuthenticated && (
+      {authenticated && (
         <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <Link
@@ -181,7 +179,7 @@ function CertificateDetailPage() {
           </div>
 
           {/* Revoke Button */}
-          {isAuthenticated && (
+          {authenticated && (
             <div className="mt-8 pt-8 border-t border-slate-800 flex items-center justify-center">
               <button
                 onClick={handleRevoke}
