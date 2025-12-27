@@ -10,6 +10,7 @@ export interface IssuePayload {
   study: string;
   signature: string;
   issuerAddress: string;
+  fileType: string;
 }
 
 export interface RevokePayload {
@@ -27,6 +28,7 @@ export const CertificateAPI = {
     formData.append("study", payload.study);
     formData.append("signature", payload.signature);
     formData.append("issuerAddress", payload.issuerAddress);
+    formData.append("fileType", payload.fileType);
 
     console.log("Issuing certificate with payload:", payload);
     console.log("Issuing certificate to: ", BACKEND_URL + "certificate/upload");

@@ -44,9 +44,10 @@ export const certificateHandler = {
       const ownerName = formData.get("ownerName") as string;
       const studyProgram = formData.get("study") as string;
       const issuerAddress = formData.get("issuerAddress") as string;
+      const fileType = formData.get("fileType") as string;
 
 
-      if (!file || !signature || !issuerAddress || !ownerName || !studyProgram) {
+      if (!file || !signature || !issuerAddress || !ownerName || !studyProgram || !fileType) {
         return c.json({ error: "Missing required fields" }, 400);
       }
 
@@ -62,7 +63,7 @@ export const certificateHandler = {
       const encryptedContent = CryptoJS.AES.encrypt(fileBase64, aesKey).toString();
 
 
-      const fileName = `${Date.now()}-${originalFileHash.substring(0, 8)}.enc`;
+      const fileName = `${fileType}-${Date.now()}-${originalFileHash.substring(0, 8)}.enc`;
       await writeFile(join(STORAGE_DIR, fileName), encryptedContent);
 
       const prevHash = await LedgerUtils.getLastHash();

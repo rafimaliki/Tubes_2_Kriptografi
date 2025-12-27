@@ -68,17 +68,51 @@ function RouteComponent() {
           bytes[i] = binaryString.charCodeAt(i);
         }
         
+        // Determine file type from cert_url prefix
+        let mimeType = "application/octet-stream";
+        let fileExtension = "";
+        
+        if (cert_url.startsWith("pdf-")) {
+          mimeType = "application/pdf";
+          fileExtension = ".pdf";
+        } else if (cert_url.startsWith("txt-")) {
+          mimeType = "text/plain";
+          fileExtension = ".txt";
+        } else if (cert_url.startsWith("img-")) {
+          // Try to determine image type from original file, default to png
+          mimeType = "image/png";
+          fileExtension = ".png";
+          
+          // Check if we can infer the image type from the binary data
+          if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) {
+            mimeType = "image/jpeg";
+            fileExtension = ".jpg";
+          } else if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) {
+            mimeType = "image/png";
+            fileExtension = ".png";
+          } else if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46) {
+            mimeType = "image/gif";
+            fileExtension = ".gif";
+          } else if (bytes[0] === 0x42 && bytes[1] === 0x4D) {
+            mimeType = "image/bmp";
+            fileExtension = ".bmp";
+          } else if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46) {
+            mimeType = "image/webp";
+            fileExtension = ".webp";
+          }
+        }
+        
         // Create blob from decrypted data
-        const decryptedBlob = new Blob([bytes], { type: "application/pdf" });
+        const decryptedBlob = new Blob([bytes], { type: mimeType });
         
         // Create download link
         const url = window.URL.createObjectURL(decryptedBlob);
         const link = document.createElement('a');
         link.href = url;
 
-        // Remove .enc extension for the downloaded file
-        const originalFileName = cert_url.replace('.enc', '');
-        link.download = originalFileName;
+        // Remove .enc extension and add appropriate file extension
+        const baseFileName = cert_url.replace('.enc', '').replace(/^(pdf|txt|img)-/, '');
+        link.download = baseFileName + fileExtension;
         document.body.appendChild(link);
         link.click();
         
