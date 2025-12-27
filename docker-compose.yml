@@ -28,7 +28,7 @@ services:
     environment:
       PORT: 5000
       NODE_ENV: development
-      DB_URL: postgres://posdockertgres:password@kripto2_db:5432/kripto2_db
+      DB_URL: postgres://postgres:password@kripto2_db:5432/kripto2_db
     networks:
       - Kripto2
 
