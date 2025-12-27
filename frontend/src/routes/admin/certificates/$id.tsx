@@ -5,6 +5,8 @@ import { AppTopbar } from "@/components/app-topbar";
 import { CertificateAPI } from "@/api/certificate.api";
 import { Crypto } from "@/lib/Crypto";
 import { RevokeModal } from "@/components/revoke-modal";
+import { useAuthStore } from "@/store/auth.store";
+
 
 export const Route = createFileRoute("/admin/certificates/$id")({
   component: CertificateDetailPage,
@@ -16,6 +18,8 @@ function CertificateDetailPage() {
   const [certificate, setCertificate] = useState<Certificate & { revokeReason?: string } | null>(null);
   const [isRevoking, setIsRevoking] = useState(false);
   const [showRevokeModal, setShowRevokeModal] = useState(false);
+
+  const { authenticated } = useAuthStore();
 
   useEffect(() => {
     let cancelled = false;
@@ -72,7 +76,6 @@ function CertificateDetailPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
-      <AppTopbar title="Back to Certificates" to="/admin/certificates" />
       {authenticated && (
         <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
