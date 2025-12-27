@@ -40,7 +40,7 @@ export const authHandler = {
         public_key
       );
       if (!verified) {
-        return c.json({ error: "Invalid Key" }, 401);
+        return c.json({ error: "Authentication failed" }, 401);
       }
 
       const jwt_payload = {

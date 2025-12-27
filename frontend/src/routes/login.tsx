@@ -24,8 +24,6 @@ Ujo4fAhTk109YLAO7KUQl+9ZdmQbNdx9412FLw4aHRRviXV9RFWdSVvq
 
     const result = await login(privateKey);
 
-    console.log("Login result:", result);
-
     if (!result.ok) {
       setError("Authentication failed");
       setIsLoading(false);
