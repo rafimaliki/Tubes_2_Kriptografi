@@ -187,7 +187,7 @@ function CertificateDetailPage() {
               reason,
             });
 
-            setCertificate({ ...certificate, status: "Revoked" });
+            setCertificate({ ...certificate, status: "Revoked", revokeReason: reason });
             setShowRevokeModal(false);
           } finally {
             setIsRevoking(false);
