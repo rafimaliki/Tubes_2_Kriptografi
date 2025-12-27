@@ -8,3 +8,8 @@ export type LoginApiResult = ApiResult<{
   jwt_token: string;
   public_key: string;
 }>;
+export type WhoamiApiResult = ApiResult<{
+  user: {
+    name: string;
+  };
+}>;

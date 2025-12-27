@@ -28,7 +28,7 @@ services:
     environment:
       PORT: 5000
       NODE_ENV: development
-      DB_URL: postgres://postgres:password@kripto2_db:5432/kripto2_db
+      DB_URL: postgres://posdockertgres:password@kripto2_db:5432/kripto2_db
     networks:
       - Kripto2
 
@@ -39,11 +39,8 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/public:/app/public
-      - ./frontend/index.html:/app/index.html
-      - ./frontend/vite.config.ts:/app/vite.config.ts
-      - ./frontend/tsconfig.json:/app/tsconfig.json
+      - ./frontend:/app
+      - /app/node_modules
     environment:
       NODE_ENV: development
     networks:

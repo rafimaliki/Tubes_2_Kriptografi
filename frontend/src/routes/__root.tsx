@@ -2,7 +2,8 @@ import { Outlet, createRootRoute, redirect } from "@tanstack/react-router";
 import { useAuthStore } from "@/store/auth.store";
 
 export const Route = createRootRoute({
-  beforeLoad: ({ location }) => {
+  beforeLoad: async ({ location }) => {
+    await useAuthStore.getState().verify();
     const { authenticated } = useAuthStore.getState();
 
     if (authenticated && location.pathname === "/login") {

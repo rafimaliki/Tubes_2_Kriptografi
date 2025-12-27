@@ -7,7 +7,11 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const [privateKey, setPrivateKey] = useState("secure-cert-issuser-key");
+  const [privateKey, setPrivateKey] = useState(`-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgZzB6cCCmSvtuMCsr
+GXpbp19W4Txq66PIzsDL/dnUmbKhRANCAAR1szZm70N510mHpGL7Sy9BWJZcM2Xj
+Ujo4fAhTk109YLAO7KUQl+9ZdmQbNdx9412FLw4aHRRviXV9RFWdSVvq
+-----END PRIVATE KEY-----`);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -20,8 +24,11 @@ function LoginPage() {
 
     const result = await login(privateKey);
 
+    console.log("Login result:", result);
+
     if (!result.ok) {
-      setError(result.error || "Login failed");
+      setError("Authentication failed");
+      setIsLoading(false);
     } else {
       navigate({
         to: "/certificates",
@@ -31,7 +38,7 @@ function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center p-4">
-      <div className="min-w-80">
+      <div className="min-w-180">
         {/* Logo/Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 mb-4">
@@ -56,7 +63,7 @@ function LoginPage() {
         </div>
 
         {/* Login Form */}
-        <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-8 shadow-2xl">
+        <div className="bg-slate-900/50  backdrop-blur-sm border border-slate-800 rounded-xl p-8 shadow-2xl">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
@@ -69,7 +76,7 @@ function LoginPage() {
                 id="privateKey"
                 value={privateKey}
                 onChange={(e) => setPrivateKey(e.target.value)}
-                rows={1}
+                rows={5}
                 className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all font-mono text-sm"
                 placeholder="Enter your private key..."
                 required

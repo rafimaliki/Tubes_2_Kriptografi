@@ -18,7 +18,8 @@ export async function generateJwt(payload: Record<string, unknown>) {
 
 export async function verifyJwt(token: string) {
   try {
-    return await verify(token, secret);
+    const decoded = (await verify(token, secret)) as Record<string, unknown>;
+    return decoded["user"] as string;
   } catch (err) {
     throw new Error("Invalid token");
   }

@@ -12,8 +12,8 @@ function CertificatesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    useAuthStore.getState().logout();
+  const handleLogout = async () => {
+    await useAuthStore.getState().logout();
     console.log("Logged out successfully");
     navigate({ to: "/login" });
   };

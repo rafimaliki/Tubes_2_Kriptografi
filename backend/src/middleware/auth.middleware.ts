@@ -2,6 +2,12 @@ import type { Context, Next } from "hono";
 import { getCookie } from "hono/cookie";
 import { verifyJwt } from "@/lib/jwt";
 
+declare module "hono" {
+  interface Context {
+    user?: string;
+  }
+}
+
 export const authMiddleware = async (c: Context, next: Next) => {
   try {
     const token = getCookie(c, "jwt_token");
@@ -10,7 +16,13 @@ export const authMiddleware = async (c: Context, next: Next) => {
       return c.json({ error: "No token provided" }, 401);
     }
 
-    await verifyJwt(token);
+    const user = await verifyJwt(token);
+
+    if (!user) {
+      return c.json({ error: "Invalid token" }, 401);
+    }
+
+    c.user = user;
 
     await next();
   } catch (error) {
