@@ -4,7 +4,7 @@ import { UploadCertificateModal } from "@/components/upload-modal";
 import { useAuthStore } from "@/store/auth.store";
 import { CertificateAPI } from "@/api/certificate.api";
 
-export const Route = createFileRoute("/certificates")({
+export const Route = createFileRoute("/admin/certificates/")({
   component: CertificatesPage,
 });
 
@@ -17,7 +17,8 @@ function CertificatesPage() {
 
   const handleLogout = async () => {
     await useAuthStore.getState().logout();
-    navigate({ to: "/login" });
+    console.log("Logged out successfully");
+    navigate({ to: "/admin/login" });
   };
 
   const loadCertificates = async () => {
@@ -96,7 +97,7 @@ function CertificatesPage() {
             {!loading && certificates.map((certificate) => (
               <Link
                 key={certificate.id}
-                to={`/certificate/$id`}
+                to={`/admin/certificates/$id`}
                 params={{ id: certificate.id }}
                 className="block bg-slate-900/50 backdrop-blur-sm border border-slate-800 hover:border-slate-700 rounded-xl p-6 transition-all duration-200 hover:shadow-xl hover:shadow-blue-900/10"
               >

@@ -13,13 +13,13 @@ export const authMiddleware = async (c: Context, next: Next) => {
     const token = getCookie(c, "jwt_token");
 
     if (!token) {
-      return c.json({ error: "No token provided" }, 401);
+      return c.json({ error: "Authentication failed" }, 401);
     }
 
     const user = await verifyJwt(token);
 
     if (!user) {
-      return c.json({ error: "Invalid token" }, 401);
+      return c.json({ error: "Authentication failed" }, 401);
     }
 
     c.user = user;
