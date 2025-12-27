@@ -5,11 +5,13 @@ import { Crypto } from "@/lib/Crypto";
 interface UploadCertificateModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onUploaded?: () => void;
 }
 
 export function UploadCertificateModal({
   isOpen,
   onClose,
+  onUploaded
 }: UploadCertificateModalProps) {
   const [ownerName, setOwnerName] = useState("");
   const [study, setStudy] = useState("");
@@ -63,12 +65,9 @@ export function UploadCertificateModal({
         issuerAddress: user.name,
       });
 
-      alert("Certificate uploaded successfully");
-
-      setOwnerName("");
-      setStudy("");
-      setFile(null);
+      onUploaded?.();
       onClose();
+
     } catch (err) {
       console.error("Upload error:", err);
       alert("Upload failed");

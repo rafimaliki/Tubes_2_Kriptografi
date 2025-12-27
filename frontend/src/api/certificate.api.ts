@@ -14,9 +14,9 @@ export interface IssuePayload {
 
 export interface RevokePayload {
   target_tx_hash: string;
-  reason: string;
   signature: string;
   issuerAddress: string;
+  reason: string;
 }
 
 export const CertificateAPI = {
@@ -46,5 +46,15 @@ export const CertificateAPI = {
     );
 
     return res.data;
+  },
+  
+  async list() {
+    const res = await axios.get(BACKEND_URL + "certificate/list");
+    return res.data;
+  },
+
+  async getById(id: string) {
+    const { data } = await axios.get(BACKEND_URL + `certificate/${id}`);
+    return data;
   },
 };

@@ -5,9 +5,32 @@ import CryptoJS from "crypto-js";
 import { db } from "@/db";
 import { ledger } from "@/db/schema";
 import { LedgerUtils } from "@/lib/ledger.utils";
-import { eq } from "drizzle-orm";
+import { and, eq, desc } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 const STORAGE_DIR = join(import.meta.dir, "../../storage/certificates");
+
+
+type IssueMetadata = {
+  action: "ISSUE";
+  fileName: string;
+  fileHash: string;
+  ownerName: string;
+  studyProgram: string;
+  issuer: string;
+  timestamp: string;
+};
+
+type RevokeMetadata = {
+  action: "REVOKE";
+  target_cert_id: string;
+  reason: string;
+  issuer: string;
+  timestamp: string;
+};
+
+type LedgerMetadata = IssueMetadata | RevokeMetadata;
+
 
 export const certificateHandler = {
   upload: async (c: Context) => {
@@ -155,4 +178,74 @@ export const certificateHandler = {
       return c.json({ error: "Download failed" }, 500);
     }
   },
+
+  list: async (c: Context) => {
+    const issues = await db
+      .select()
+      .from(ledger)
+      .where(eq(ledger.transaction_type, "ISSUE"))
+      .orderBy(desc(ledger.created_at));
+
+    const revokes = await db
+      .select()
+      .from(ledger)
+      .where(eq(ledger.transaction_type, "REVOKE"));
+
+    const revokedTargets = new Set(
+      revokes
+        .map((r) => (r.metadata as RevokeMetadata | null)?.target_cert_id)
+        .filter(Boolean)
+    );
+
+    return c.json(
+      issues.map((r) => {
+        const metadata = r.metadata as IssueMetadata;
+
+        return {
+          id: r.current_hash,
+          ownerName: metadata.ownerName,
+          study: metadata.studyProgram,
+          issueDate: metadata.timestamp,
+          status: revokedTargets.has(r.current_hash) ? "Revoked" : "Valid",
+        };
+      })
+    );
+  },
+
+  getById: async (c: Context) => {
+    const id = c.req.param("id");
+
+    const rows = await db
+      .select()
+      .from(ledger)
+      .where(and(eq(ledger.current_hash, id)))
+      .limit(1);
+
+    const revoke = await db
+      .select()
+      .from(ledger)
+      .where(sql`${ledger.metadata} ->> 'target_cert_id' = ${id}`)
+
+    const revokeEntry = revoke[0];
+    const revokeMetadata = revokeEntry?.metadata as RevokeMetadata | undefined;
+
+
+    if (!rows.length) {
+      return c.json({ error: "Certificate not found" }, 404);
+    }
+
+    const issue = rows[0];
+    const metadata = issue!.metadata as any;
+
+    return c.json({
+      id,
+      ownerName: metadata.ownerName,
+      study: metadata.studyProgram,
+      issueDate: metadata.timestamp,
+      status: revoke.length ? "Revoked" : "Valid",
+      revokeReason: revokeMetadata?.reason || null,
+    });
+  },
+
+
 };
