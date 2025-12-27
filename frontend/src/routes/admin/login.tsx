@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAuthStore } from "@/store/auth.store";
+import { AppLogoHeader } from "@/components/app-logo-header";
 
 export const Route = createFileRoute("/admin/login")({
   component: LoginPage,
@@ -29,7 +30,7 @@ Ujo4fAhTk109YLAO7KUQl+9ZdmQbNdx9412FLw4aHRRviXV9RFWdSVvq
       setIsLoading(false);
     } else {
       navigate({
-        to: "/admin/certificates",
+        to: "/certificates",
       });
     }
   };
@@ -38,27 +39,7 @@ Ujo4fAhTk109YLAO7KUQl+9ZdmQbNdx9412FLw4aHRRviXV9RFWdSVvq
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center p-4">
       <div className="min-w-180">
         {/* Logo/Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 mb-4">
-            <svg
-              className="w-8 h-8 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-              />
-            </svg>
-          </div>
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Secure Certificates
-          </h1>
-          <p className="text-slate-400">Issuer Authentication</p>
-        </div>
+        <AppLogoHeader title="Issuer Authentication" />
 
         {/* Login Form */}
         <div className="bg-slate-900/50  backdrop-blur-sm border border-slate-800 rounded-xl p-8 shadow-2xl">

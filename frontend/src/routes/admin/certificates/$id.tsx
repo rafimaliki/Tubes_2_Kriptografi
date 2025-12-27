@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { mockCertificates } from "@/data/mock-certificates";
 import type { Certificate } from "@/data/mock-certificates";
-import { useAuthStore } from "@/store/auth.store";
+import { AppTopbar } from "@/components/app-topbar";
 
 export const Route = createFileRoute("/admin/certificates/$id")({
   component: CertificateDetailPage,
@@ -10,7 +10,6 @@ export const Route = createFileRoute("/admin/certificates/$id")({
 
 function CertificateDetailPage() {
   const { id } = Route.useParams();
-  const { authenticated } = useAuthStore();
 
   const [certificate, setCertificate] = useState<Certificate | null>(null);
   const [isRevoking, setIsRevoking] = useState(false);
@@ -69,29 +68,7 @@ function CertificateDetailPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
       {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link
-            to="/admin/certificates"
-            className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors w-fit"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-            Back to Certificates
-          </Link>
-        </div>
-      </header>
+      <AppTopbar title="Back to Certificates" to="/admin/certificates" />
 
       {/* Main Content */}
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

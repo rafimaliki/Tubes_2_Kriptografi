@@ -8,6 +8,7 @@ export const Route = createFileRoute("/admin")({
     await auth.verify();
 
     const isLoginPage = location.pathname === "/admin/login";
+    const isBaseAdminPage = location.pathname === "/admin";
     const isAuthenticated = auth.authenticated;
 
     if (!isAuthenticated && !isLoginPage) {
@@ -16,6 +17,10 @@ export const Route = createFileRoute("/admin")({
 
     if (isAuthenticated && isLoginPage) {
       throw redirect({ to: "/admin/certificates" });
+    }
+
+    if (isBaseAdminPage) {
+      throw redirect({ to: "/admin/login" });
     }
   },
 
