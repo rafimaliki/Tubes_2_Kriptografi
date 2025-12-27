@@ -1,4 +1,6 @@
 import { useState, type FormEvent } from "react";
+import { CertificateAPI } from "@/api/certificate.api";
+import { Crypto } from "@/lib/Crypto";
 
 interface UploadCertificateModalProps {
   isOpen: boolean;
@@ -11,19 +13,68 @@ export function UploadCertificateModal({
 }: UploadCertificateModalProps) {
   const [ownerName, setOwnerName] = useState("");
   const [study, setStudy] = useState("");
+  const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
+    console.log("file status:", file);
     e.preventDefault();
+
+    if (!file) {
+      alert("Please select a file first");
+      return;
+    }
+
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      alert(`Certificate uploaded successfully!\nUUID: ${crypto.randomUUID()}`);
-      setIsSubmitting(false);
+    try {
+      const rawUser = localStorage.getItem("app_user");
+
+      console.log("rawUser:", rawUser);
+
+      if (!rawUser) {
+        alert("Not authenticated");
+        return;
+      }
+
+      let user: any;
+      try {
+        const decoded = atob(rawUser);
+        user = JSON.parse(decoded);
+      } catch (err) {
+        console.error("Failed to decode user:", err);
+        alert("Invalid user session, please login again");
+        localStorage.removeItem("app_user");
+        return;
+      }
+
+
+      const buffer = await file.arrayBuffer();
+      const hash = await crypto.subtle.digest("SHA-256", buffer);
+      const hashBase64 = btoa(String.fromCharCode(...new Uint8Array(hash)));
+
+      const signature = await Crypto.signNonce(hashBase64, user.private_key);
+
+      await CertificateAPI.issue({
+        file,
+        ownerName,
+        study,
+        signature,
+        issuerAddress: user.name,
+      });
+
+      alert("Certificate uploaded successfully");
+
       setOwnerName("");
       setStudy("");
+      setFile(null);
       onClose();
-    }, 1000);
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("Upload failed");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -42,6 +93,7 @@ export function UploadCertificateModal({
         <div className="flex items-center justify-between p-6 border-b border-slate-800">
           <h2 className="text-xl font-bold text-white">Upload Certificate</h2>
           <button
+            title= "Close"
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors"
           >
@@ -68,26 +120,83 @@ export function UploadCertificateModal({
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Certificate File
             </label>
-            <div className="border-2 border-dashed border-slate-700 hover:border-slate-600 rounded-lg p-8 text-center transition-colors cursor-pointer">
-              <svg
-                className="w-12 h-12 text-slate-600 mx-auto mb-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                />
-              </svg>
-              <p className="text-slate-400 text-sm">
-                Click to upload or drag and drop
-              </p>
-              <p className="text-slate-600 text-xs mt-1">PDF or TXT</p>
+
+            <div
+              onClick={() => document.getElementById("cert-file-input")?.click()}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const droppedFile = e.dataTransfer.files?.[0];
+                if (droppedFile) setFile(droppedFile);
+              }}
+              className={`rounded-lg p-8 text-center transition-colors cursor-pointer border-2 ${
+                file
+                  ? "border-emerald-500/60 bg-emerald-500/10"
+                  : "border-dashed border-slate-700 hover:border-slate-600"
+              }`}
+            >
+              {file ? (
+                <>
+                  <svg
+                    className="w-12 h-12 text-emerald-400 mx-auto mb-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  <p className="text-emerald-300 text-sm font-medium">
+                    {file.name}
+                  </p>
+                  <p className="text-emerald-400/70 text-xs mt-1">
+                    {(file.size / 1024).toFixed(1)} KB
+                  </p>
+                  <p className="text-emerald-400/60 text-xs mt-2">
+                    Click or drop another file to replace
+                  </p>
+                </>
+              ) : (
+                <>
+                  <svg
+                    className="w-12 h-12 text-slate-600 mx-auto mb-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
+                  </svg>
+                  <p className="text-slate-400 text-sm">
+                    Click to upload or drag and drop
+                  </p>
+                  <p className="text-slate-600 text-xs mt-1">PDF or TXT</p>
+                </>
+              )}
             </div>
+
+            <input
+              title="Upload certificate file"
+              id="cert-file-input"
+              type="file"
+              accept=".pdf,.txt"
+              className="hidden"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
           </div>
+
 
           {/* Owner */}
           <div>
