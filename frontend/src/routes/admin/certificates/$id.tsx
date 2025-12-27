@@ -77,7 +77,7 @@ function CertificateDetailPage() {
           <h2 className="text-xl font-semibold text-white mb-2">Certificate Not Found</h2>
           <p className="text-slate-400 mb-6">The requested certificate does not exist.</p>
           <Link
-            to="/certificates"
+            to="/admin/certificates"
             className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg transition-all duration-200 inline-block"
           >
             Go Home
@@ -92,7 +92,7 @@ function CertificateDetailPage() {
       {authenticated && (
         <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <Link to="/certificates" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors w-fit">
+            <Link to="/admin/certificates" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors w-fit">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>

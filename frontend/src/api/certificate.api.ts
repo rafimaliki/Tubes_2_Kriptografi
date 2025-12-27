@@ -57,4 +57,11 @@ export const CertificateAPI = {
     const { data } = await axios.get(BACKEND_URL + `certificate/${id}`);
     return data;
   },
+
+  async download(fileName: string) {
+    const res = await axios.get(BACKEND_URL + `certificate/download/${fileName}`, {
+      responseType: 'blob',
+    });
+    return res.data;
+  },
 };

@@ -79,7 +79,7 @@ export const certificateHandler = {
 
       const currentHash = LedgerUtils.calculateHash(prevHash, metadata, signature);
 
-      const accessUrl = `http://localhost:3000/verify?cert_url=/storage/certificates/${fileName}&aes_key=${encodeURIComponent(
+      const accessUrl = `http://localhost:3000/verify?cert_url=${fileName}&aes_key=${encodeURIComponent(
         aesKey
       )}&tx_hash=${currentHash}`;
 
@@ -178,7 +178,16 @@ export const certificateHandler = {
         return c.json({ error: "Access denied" }, 403);
       }
 
-      return new Response(file);
+      const origin = c.req.header("origin") || "http://localhost:3000";
+      
+      return new Response(file, {
+        headers: {
+          "Content-Type": "application/octet-stream",
+          "Content-Disposition": `attachment; filename="${fileName}"`,
+          "Access-Control-Allow-Origin": origin,
+          "Access-Control-Allow-Credentials": "true",
+        },
+      });
     } catch {
       return c.json({ error: "Download failed" }, 500);
     }
@@ -243,7 +252,7 @@ export const certificateHandler = {
     if (!issue) {
       return c.json({ error: "Certificate not found" }, 404);
     }
-    
+
     const metadata = issue!.metadata as any;
 
     let decryptedAccessUrl = "";
