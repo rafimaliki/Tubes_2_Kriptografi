@@ -4,7 +4,7 @@ import { mockCertificates } from "@/data/mock-certificates";
 import type { Certificate } from "@/data/mock-certificates";
 import { useAuthStore } from "@/store/auth.store";
 
-export const Route = createFileRoute("/certificate/$id")({
+export const Route = createFileRoute("/admin/certificates/$id")({
   component: CertificateDetailPage,
 });
 
@@ -69,31 +69,29 @@ function CertificateDetailPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
       {/* Header */}
-      {authenticated && (
-        <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <Link
-              to="/certificates"
-              className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors w-fit"
+      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <Link
+            to="/admin/certificates"
+            className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors w-fit"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-              Back to Certificates
-            </Link>
-          </div>
-        </header>
-      )}
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            Back to Certificates
+          </Link>
+        </div>
+      </header>
 
       {/* Main Content */}
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -179,21 +177,19 @@ function CertificateDetailPage() {
           </div>
 
           {/* Revoke Button */}
-          {authenticated && (
-            <div className="mt-8 pt-8 border-t border-slate-800 flex items-center justify-center">
-              <button
-                onClick={handleRevoke}
-                disabled={certificate.status === "Revoked" || isRevoking}
-                className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-medium rounded-lg transition-all duration-200 shadow-lg shadow-red-900/80 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isRevoking
-                  ? "Revoking..."
-                  : certificate.status === "Revoked"
-                    ? "Certificate Revoked"
-                    : "Revoke Certificate"}
-              </button>
-            </div>
-          )}
+          <div className="mt-8 pt-8 border-t border-slate-800 flex items-center justify-center">
+            <button
+              onClick={handleRevoke}
+              disabled={certificate.status === "Revoked" || isRevoking}
+              className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-medium rounded-lg transition-all duration-200 shadow-lg shadow-red-900/80 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isRevoking
+                ? "Revoking..."
+                : certificate.status === "Revoked"
+                  ? "Certificate Revoked"
+                  : "Revoke Certificate"}
+            </button>
+          </div>
         </div>
       </main>
     </div>

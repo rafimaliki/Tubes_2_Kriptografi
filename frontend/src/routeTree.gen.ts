@@ -9,82 +9,130 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as CertificatesRouteImport } from './routes/certificates'
 import { Route as SplatRouteImport } from './routes/$'
-import { Route as CertificateIdRouteImport } from './routes/certificate.$id'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
+import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as PublicVerifyRouteImport } from './routes/_public/verify'
+import { Route as PublicSearchRouteImport } from './routes/_public/search'
+import { Route as AdminCertificatesIndexRouteImport } from './routes/admin/certificates/index'
+import { Route as AdminCertificatesIdRouteImport } from './routes/admin/certificates/$id'
 
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CertificatesRoute = CertificatesRouteImport.update({
-  id: '/certificates',
-  path: '/certificates',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SplatRoute = SplatRouteImport.update({
   id: '/$',
   path: '/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CertificateIdRoute = CertificateIdRouteImport.update({
-  id: '/certificate/$id',
-  path: '/certificate/$id',
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PublicIndexRoute = PublicIndexRouteImport.update({
+  id: '/_public/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const PublicVerifyRoute = PublicVerifyRouteImport.update({
+  id: '/_public/verify',
+  path: '/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublicSearchRoute = PublicSearchRouteImport.update({
+  id: '/_public/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCertificatesIndexRoute = AdminCertificatesIndexRouteImport.update({
+  id: '/certificates/',
+  path: '/certificates/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminCertificatesIdRoute = AdminCertificatesIdRouteImport.update({
+  id: '/certificates/$id',
+  path: '/certificates/$id',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/admin': typeof AdminRouteRouteWithChildren
   '/$': typeof SplatRoute
-  '/certificates': typeof CertificatesRoute
-  '/login': typeof LoginRoute
-  '/certificate/$id': typeof CertificateIdRoute
+  '/search': typeof PublicSearchRoute
+  '/verify': typeof PublicVerifyRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/': typeof PublicIndexRoute
+  '/admin/certificates/$id': typeof AdminCertificatesIdRoute
+  '/admin/certificates': typeof AdminCertificatesIndexRoute
 }
 export interface FileRoutesByTo {
+  '/admin': typeof AdminRouteRouteWithChildren
   '/$': typeof SplatRoute
-  '/certificates': typeof CertificatesRoute
-  '/login': typeof LoginRoute
-  '/certificate/$id': typeof CertificateIdRoute
+  '/search': typeof PublicSearchRoute
+  '/verify': typeof PublicVerifyRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/': typeof PublicIndexRoute
+  '/admin/certificates/$id': typeof AdminCertificatesIdRoute
+  '/admin/certificates': typeof AdminCertificatesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/admin': typeof AdminRouteRouteWithChildren
   '/$': typeof SplatRoute
-  '/certificates': typeof CertificatesRoute
-  '/login': typeof LoginRoute
-  '/certificate/$id': typeof CertificateIdRoute
+  '/_public/search': typeof PublicSearchRoute
+  '/_public/verify': typeof PublicVerifyRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/_public/': typeof PublicIndexRoute
+  '/admin/certificates/$id': typeof AdminCertificatesIdRoute
+  '/admin/certificates/': typeof AdminCertificatesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/$' | '/certificates' | '/login' | '/certificate/$id'
+  fullPaths:
+    | '/admin'
+    | '/$'
+    | '/search'
+    | '/verify'
+    | '/admin/login'
+    | '/'
+    | '/admin/certificates/$id'
+    | '/admin/certificates'
   fileRoutesByTo: FileRoutesByTo
-  to: '/$' | '/certificates' | '/login' | '/certificate/$id'
-  id: '__root__' | '/$' | '/certificates' | '/login' | '/certificate/$id'
+  to:
+    | '/admin'
+    | '/$'
+    | '/search'
+    | '/verify'
+    | '/admin/login'
+    | '/'
+    | '/admin/certificates/$id'
+    | '/admin/certificates'
+  id:
+    | '__root__'
+    | '/admin'
+    | '/$'
+    | '/_public/search'
+    | '/_public/verify'
+    | '/admin/login'
+    | '/_public/'
+    | '/admin/certificates/$id'
+    | '/admin/certificates/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
   SplatRoute: typeof SplatRoute
-  CertificatesRoute: typeof CertificatesRoute
-  LoginRoute: typeof LoginRoute
-  CertificateIdRoute: typeof CertificateIdRoute
+  PublicSearchRoute: typeof PublicSearchRoute
+  PublicVerifyRoute: typeof PublicVerifyRoute
+  PublicIndexRoute: typeof PublicIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/certificates': {
-      id: '/certificates'
-      path: '/certificates'
-      fullPath: '/certificates'
-      preLoaderRoute: typeof CertificatesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/$': {
       id: '/$'
       path: '/$'
@@ -92,21 +140,80 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/certificate/$id': {
-      id: '/certificate/$id'
-      path: '/certificate/$id'
-      fullPath: '/certificate/$id'
-      preLoaderRoute: typeof CertificateIdRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_public/': {
+      id: '/_public/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof PublicIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/_public/verify': {
+      id: '/_public/verify'
+      path: '/verify'
+      fullPath: '/verify'
+      preLoaderRoute: typeof PublicVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_public/search': {
+      id: '/_public/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof PublicSearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/certificates/': {
+      id: '/admin/certificates/'
+      path: '/certificates'
+      fullPath: '/admin/certificates'
+      preLoaderRoute: typeof AdminCertificatesIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/certificates/$id': {
+      id: '/admin/certificates/$id'
+      path: '/certificates/$id'
+      fullPath: '/admin/certificates/$id'
+      preLoaderRoute: typeof AdminCertificatesIdRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
   }
 }
 
+interface AdminRouteRouteChildren {
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminCertificatesIdRoute: typeof AdminCertificatesIdRoute
+  AdminCertificatesIndexRoute: typeof AdminCertificatesIndexRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminLoginRoute: AdminLoginRoute,
+  AdminCertificatesIdRoute: AdminCertificatesIdRoute,
+  AdminCertificatesIndexRoute: AdminCertificatesIndexRoute,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
+  AdminRouteRoute: AdminRouteRouteWithChildren,
   SplatRoute: SplatRoute,
-  CertificatesRoute: CertificatesRoute,
-  LoginRoute: LoginRoute,
-  CertificateIdRoute: CertificateIdRoute,
+  PublicSearchRoute: PublicSearchRoute,
+  PublicVerifyRoute: PublicVerifyRoute,
+  PublicIndexRoute: PublicIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

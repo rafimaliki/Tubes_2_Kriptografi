@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAuthStore } from "@/store/auth.store";
 
-export const Route = createFileRoute("/login")({
+export const Route = createFileRoute("/admin/login")({
   component: LoginPage,
 });
 
@@ -29,7 +29,7 @@ Ujo4fAhTk109YLAO7KUQl+9ZdmQbNdx9412FLw4aHRRviXV9RFWdSVvq
       setIsLoading(false);
     } else {
       navigate({
-        to: "/certificates",
+        to: "/admin/certificates",
       });
     }
   };

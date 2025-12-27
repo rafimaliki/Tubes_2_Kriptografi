@@ -6,9 +6,9 @@ export const Route = createFileRoute("/$")({
     const { authenticated } = useAuthStore.getState();
 
     if (authenticated) {
-      throw redirect({ to: "/certificates" });
+      throw redirect({ to: "/admin/certificates" });
     } else {
-      throw redirect({ to: "/login" });
+      throw redirect({ to: "/search" });
     }
   },
 });
