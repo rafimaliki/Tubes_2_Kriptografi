@@ -7,9 +7,7 @@ export const Route = createFileRoute("/_public/search")({
 });
 
 function SearchPage() {
-  const [urlToVerify, setUrlToVerify] = useState(
-    "http://localhost:3000/verify?cert_url=backend:5000/storage/certificates/{id}&aes_key=key&tx_hash=hash_value"
-  );
+  const [urlToVerify, setUrlToVerify] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 

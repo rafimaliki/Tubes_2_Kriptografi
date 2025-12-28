@@ -166,8 +166,7 @@ function CertificateDetailPage() {
                       : "bg-red-500/20 text-red-400"
                   }`}
                 >
-                  {certificate.status.charAt(0).toUpperCase() +
-                    certificate.status.slice(1)}
+                  {certificate.status.toUpperCase()}
                 </span>
               </div>
               {certificate.status === "revoked" && certificate.revokeReason && (

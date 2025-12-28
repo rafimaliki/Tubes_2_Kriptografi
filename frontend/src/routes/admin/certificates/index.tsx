@@ -142,11 +142,11 @@ function CertificatesPage() {
                             certificate.status === "valid"
                               ? "bg-emerald-500/20 text-emerald-400"
                               : certificate.status === "revoked"
-                              ? "bg-red-500/20 text-red-400"
-                              : "bg-orange-500/20 text-orange-400"
+                                ? "bg-red-500/20 text-red-400"
+                                : "bg-orange-500/20 text-orange-400"
                           }`}
                         >
-                          {certificate.status.charAt(0).toUpperCase() + certificate.status.slice(1)}
+                          {certificate.status.toUpperCase()}
                         </span>
                       </div>
                       <p className="text-slate-400 mb-2">{certificate.study}</p>

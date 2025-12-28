@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { db } from "@/db";
 import { ledger } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, desc } from "drizzle-orm";
 import { LedgerUtils } from "@/lib/ledger.utils";
 
 type RevokeMetadata = {
@@ -11,7 +11,8 @@ type RevokeMetadata = {
   issuer: string;
   timestamp: string;
 };
-const GENESIS_HASH = "0000000000000000000000000000000000000000000000000000000000000000";
+const GENESIS_HASH =
+  "0000000000000000000000000000000000000000000000000000000000000000";
 
 export const ledgerHandler = {
   validateTransaction: async (hash: string): Promise<boolean> => {
@@ -99,13 +100,15 @@ export const ledgerHandler = {
             created_at: transaction.created_at,
           },
           status: "invalid",
-          message: "Transaction chain validation failed - hash mismatch detected",
+          message:
+            "Transaction chain validation failed - hash mismatch detected",
         });
       }
 
-      const isRevoked = transaction.transaction_type === "ISSUE"
-        ? await ledgerHandler.isTransactionRevoked(hash)
-        : false;
+      const isRevoked =
+        transaction.transaction_type === "ISSUE"
+          ? await ledgerHandler.isTransactionRevoked(hash)
+          : false;
 
       const status = isRevoked ? "revoked" : "valid";
 
@@ -141,6 +144,30 @@ export const ledgerHandler = {
     } catch (error) {
       console.error("Get Transaction Error:", error);
       return c.json({ error: "Failed to get transaction" }, 500);
+    }
+  },
+
+  listTransactions: async (c: Context) => {
+    try {
+      const transactions = await db
+        .select({
+          id: ledger.id,
+          previous_hash: ledger.previous_hash,
+          current_hash: ledger.current_hash,
+          transaction_type: ledger.transaction_type,
+          metadata: ledger.metadata,
+          signature: ledger.signature,
+          created_at: ledger.created_at,
+        })
+        .from(ledger)
+        .orderBy(desc(ledger.created_at));
+
+      console.log("Fetched Transactions:", transactions);
+
+      return c.json(transactions);
+    } catch (error) {
+      console.error("Get All Transactions Error:", error);
+      return c.json({ error: "Failed to get transactions" }, 500);
     }
   },
 };
