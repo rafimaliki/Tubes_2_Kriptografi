@@ -22,7 +22,7 @@ function RouteComponent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
       {/* Header */}
-      <AppTopbar title="Back to Search" to="/search" />
+      <AppTopbar title="Back" to="/search" />
 
       <div className="flex flex-col">
         <div>Certificate URL : {cert_url}</div>

@@ -6,6 +6,7 @@ import { Crypto } from "@/lib/Crypto";
 import { RevokeModal } from "@/components/revoke-modal";
 import { useAuthStore } from "@/store/auth.store";
 import { formatDate } from "@/lib/Date";
+import { AppTopbar } from "@/components/app-topbar";
 
 export const Route = createFileRoute("/admin/certificates/$id")({
   component: CertificateDetailPage,
@@ -85,32 +86,7 @@ function CertificateDetailPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
-      {authenticated && (
-        <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <Link
-              to="/certificates"
-              className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors w-fit"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-              Back to Certificates
-            </Link>
-          </div>
-        </header>
-      )}
-
+      <AppTopbar title="Back" to="/admin/certificates" />
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-2xl p-8 sm:p-12 shadow-2xl">
           <div className="text-center mb-8 pb-8 border-b border-slate-800">
