@@ -84,7 +84,7 @@ This is a centralized immutable ledger system for certificate issuance and verif
 3. For first-time setup, migrate the database:
 
    ```bash
-   docker-compose exec backend npm run db:push
+   docker-compose exec backend bun run db:push
    ```
 
 4. Access the application at `http://localhost:3000` for public access or `http://localhost:3000/admin` for admin access.
