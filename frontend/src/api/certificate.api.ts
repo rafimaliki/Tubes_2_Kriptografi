@@ -66,4 +66,9 @@ export const CertificateAPI = {
     });
     return res.data;
   },
+
+  async getTransaction(txHash: string) {
+    const { data } = await axios.get(BACKEND_URL + `ledger/${txHash}`);
+    return data;
+  },
 };

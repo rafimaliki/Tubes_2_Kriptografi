@@ -31,6 +31,40 @@ function RouteComponent() {
     url: string;
   } | null>(null);
   const [textContent, setTextContent] = useState<string>("");
+  const [transactionStatus, setTransactionStatus] = useState<'valid' | 'invalid' | 'revoked' | null>(null);
+  const [transactionData, setTransactionData] = useState<any>(null);
+  const [transactionError, setTransactionError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const validateTransaction = async () => {
+      if (!tx_hash) {
+        setTransactionError("No transaction hash provided");
+        return;
+      }
+
+      try {
+        const result = await CertificateAPI.getTransaction(tx_hash);
+        setTransactionData(result);
+        setTransactionStatus(result.status);
+
+        if (result.status === 'invalid') {
+          setTransactionError("Transaction validation failed - ledger integrity compromised");
+        } else if (result.status === 'revoked') {
+          setTransactionError(`This certificate has been revoked. Reason: ${result.revokeReason || 'Not specified'}`);
+        }
+      } catch (err: any) {
+        console.error("Transaction validation failed:", err);
+        if (err.response?.status === 404) {
+          setTransactionError("Transaction not found in the ledger");
+        } else {
+          setTransactionError("Failed to validate transaction");
+        }
+        setTransactionStatus('invalid');
+      }
+    };
+
+    validateTransaction();
+  }, [tx_hash]);
 
   // Auto-load and decrypt on mount
   useEffect(() => {
@@ -40,6 +74,16 @@ function RouteComponent() {
       if (!cert_url || !aes_key) {
         if (!cert_url) setError("No certificate URL provided");
         else if (!aes_key) setError("No AES key provided");
+        return;
+      }
+
+      // Don't load file if transaction is invalid or revoked
+      if (transactionStatus === 'invalid' || transactionStatus === 'revoked') {
+        return;
+      }
+
+      // Wait for transaction validation to complete
+      if (transactionStatus === null) {
         return;
       }
 
@@ -165,7 +209,7 @@ function RouteComponent() {
         window.URL.revokeObjectURL(objectUrl);
       }
     };
-  }, [cert_url, aes_key]);
+  }, [cert_url, aes_key, transactionStatus]);
 
   const handleDownload = () => {
     if (!decryptedData) return;
@@ -216,6 +260,18 @@ function RouteComponent() {
               <p className="text-blue-300 text-sm">Loading and decrypting certificate...</p>
             </div>
           )}
+
+          {transactionError && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3">
+              <svg className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div className="flex-1">
+                <h3 className="text-red-400 font-semibold mb-1">Transaction Error</h3>
+                <p className="text-red-300 text-sm">{transactionError}</p>
+              </div>
+            </div>
+          )}
           
           <div className="space-y-4">
             <div>
@@ -239,7 +295,60 @@ function RouteComponent() {
               </p>
             </div>
 
-            {decryptedData && (
+            {transactionStatus && (
+              <div>
+                <label className="block text-sm font-medium text-slate-500 mb-2">Transaction Status</label>
+                <span className={`inline-block px-3 py-1 rounded-full font-medium ${
+                  transactionStatus === "valid"
+                    ? "bg-emerald-500/20 text-emerald-400"
+                    : transactionStatus === "revoked"
+                    ? "bg-red-500/20 text-red-400"
+                    : "bg-orange-500/20 text-orange-400"
+                }`}>
+                  {transactionStatus.charAt(0).toUpperCase() + transactionStatus.slice(1)}
+                </span>
+              </div>
+            )}
+
+            {transactionStatus === 'valid' && transactionData?.transaction && (
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-slate-500 mb-3">Transaction Metadata</label>
+                <div className="bg-slate-950 border border-slate-800 rounded-lg p-4 space-y-3">
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-slate-500 mb-1">Owner Name</label>
+                      <p className="text-sm text-slate-300">{transactionData.transaction.metadata?.ownerName || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-slate-500 mb-1">Study Program</label>
+                      <p className="text-sm text-slate-300">{transactionData.transaction.metadata?.studyProgram || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-slate-500 mb-1">Issuer</label>
+                      <p className="text-sm text-slate-300">{transactionData.transaction.metadata?.issuer || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-slate-500 mb-1">Issue Date</label>
+                      <p className="text-sm text-slate-300">
+                        {transactionData.transaction.metadata?.timestamp 
+                          ? new Date(transactionData.transaction.metadata.timestamp).toLocaleString()
+                          : 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-500 mb-1">Previous Hash</label>
+                    <p className="text-xs font-mono text-slate-400 break-all">{transactionData.transaction.previous_hash}</p>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-500 mb-1">File Hash</label>
+                    <p className="text-xs font-mono text-slate-400 break-all">{transactionData.transaction.metadata?.fileHash || 'N/A'}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {decryptedData && transactionStatus === 'valid' && (
               <>
                 {/* Certificate Preview */}
                 <div className="mt-8">
