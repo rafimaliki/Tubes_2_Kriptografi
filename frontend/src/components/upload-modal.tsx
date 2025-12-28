@@ -57,7 +57,6 @@ export function UploadCertificateModal({
 
       const signature = await Crypto.signNonce(hashBase64, user.private_key);
 
-      // Determine file type
       let fileType = "txt";
       const fileExt = file.name.split('.').pop()?.toLowerCase();
       if (fileExt === "pdf") {

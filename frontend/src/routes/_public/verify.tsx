@@ -4,6 +4,7 @@ import { CertificateAPI } from "@/api/certificate.api";
 import { useState, useEffect } from "react";
 import CryptoJS from "crypto-js";
 import { FileWatermark } from "@/lib/FileWatermark";
+import { Crypto } from "@/lib/Crypto";
 
 type VerifySearch = {
   cert_url?: string;
@@ -34,6 +35,8 @@ function RouteComponent() {
   const [transactionStatus, setTransactionStatus] = useState<'valid' | 'invalid' | 'revoked' | null>(null);
   const [transactionData, setTransactionData] = useState<any>(null);
   const [transactionError, setTransactionError] = useState<string | null>(null);
+  const [signatureValid, setSignatureValid] = useState<boolean | null>(null);
+  const [signatureError, setSignatureError] = useState<string | null>(null);
 
   useEffect(() => {
     const validateTransaction = async () => {
@@ -77,12 +80,10 @@ function RouteComponent() {
         return;
       }
 
-      // Don't load file if transaction is invalid or revoked
       if (transactionStatus === 'invalid' || transactionStatus === 'revoked') {
         return;
       }
 
-      // Wait for transaction validation to complete
       if (transactionStatus === null) {
         return;
       }
@@ -136,7 +137,6 @@ function RouteComponent() {
             mimeType = "image/png";
             fileExtension = ".png";
 
-            // Check if we can infer the image type from the binary data
             if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) {
               mimeType = "image/jpeg";
               fileExtension = ".jpg";
@@ -155,8 +155,35 @@ function RouteComponent() {
             }
           }
 
-          // Create blob from decrypted data
           const decryptedBlob = new Blob([bytes], { type: mimeType });
+          
+          // Verify signature
+          if (transactionData?.transaction?.signature) {
+            try {
+              const fileHash = await crypto.subtle.digest("SHA-256", bytes.buffer);
+              const fileHashBase64 = btoa(String.fromCharCode(...new Uint8Array(fileHash)));
+              
+              // Public key for verification
+              const PUBLIC_KEY = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEdbM2Zu9DeddJh6Ri+0svQViWXDNl41I6OHwIU5NdPWCwDuylEJfvWXZkGzXcfeNdhS8OGh0Ub4l1fURVnUlb6g==";
+              
+              // Verify the signature
+              const isValid = await Crypto.verifySignature(
+                fileHashBase64,
+                transactionData.transaction.signature,
+                PUBLIC_KEY
+              );
+              
+              setSignatureValid(isValid);
+              
+              if (!isValid) {
+                setSignatureError("File signature verification failed - file may have been tampered with");
+              }
+            } catch (err) {
+              console.error("Signature verification error:", err);
+              setSignatureError("Failed to verify file signature");
+              setSignatureValid(false);
+            }
+          }
           
           // Remove .enc extension and add appropriate file extension
           const baseFileName = cert_url.replace('.enc', '').replace(/^(pdf|txt|img)-/, '');
@@ -178,7 +205,6 @@ function RouteComponent() {
             url,
           });
 
-          // If it's a text file, read the content
           if (fileType === "txt") {
             const text = await watermarkedBlob.text();
             setTextContent(text);
@@ -190,7 +216,6 @@ function RouteComponent() {
       } catch (error: any) {
         console.error("Load failed:", error);
 
-        // Check for specific error types
         if (error.response?.status === 404) {
           setError("Certificate file not found. The certificate may have been removed or the URL is incorrect.");
         } else {
@@ -272,6 +297,18 @@ function RouteComponent() {
               </div>
             </div>
           )}
+
+          {signatureError && (
+            <div className="mb-6 p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg flex items-start gap-3">
+              <svg className="w-6 h-6 text-orange-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div className="flex-1">
+                <h3 className="text-orange-400 font-semibold mb-1">Signature Verification Warning</h3>
+                <p className="text-orange-300 text-sm">{signatureError}</p>
+              </div>
+            </div>
+          )}
           
           <div className="space-y-4">
             <div>
@@ -306,6 +343,19 @@ function RouteComponent() {
                     : "bg-orange-500/20 text-orange-400"
                 }`}>
                   {transactionStatus.charAt(0).toUpperCase() + transactionStatus.slice(1)}
+                </span>
+              </div>
+            )}
+
+            {signatureValid !== null && (
+              <div>
+                <label className="block text-sm font-medium text-slate-500 mb-2">File Signature</label>
+                <span className={`inline-block px-3 py-1 rounded-full font-medium ${
+                  signatureValid
+                    ? "bg-emerald-500/20 text-emerald-400"
+                    : "bg-red-500/20 text-red-400"
+                }`}>
+                  {signatureValid ? "Valid" : "Invalid"}
                 </span>
               </div>
             )}

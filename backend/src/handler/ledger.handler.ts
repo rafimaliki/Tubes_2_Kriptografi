@@ -16,7 +16,6 @@ const GENESIS_HASH = "0000000000000000000000000000000000000000000000000000000000
 export const ledgerHandler = {
   validateTransaction: async (hash: string): Promise<boolean> => {
     try {
-      // Get the transaction
       const [transaction] = await db
         .select()
         .from(ledger)
@@ -24,12 +23,11 @@ export const ledgerHandler = {
         .limit(1);
 
       if (!transaction) {
-        return false; // Transaction not found
+        return false;
       }
 
       // If this is the genesis transaction (first transaction)
       if (transaction.previous_hash === GENESIS_HASH) {
-        // Validate that the hash is correctly calculated
         const calculatedHash = LedgerUtils.calculateHash(
           transaction.previous_hash,
           transaction.metadata,
@@ -38,7 +36,6 @@ export const ledgerHandler = {
         return calculatedHash === transaction.current_hash;
       }
 
-      // Validate current transaction's hash
       const calculatedHash = LedgerUtils.calculateHash(
         transaction.previous_hash,
         transaction.metadata,
