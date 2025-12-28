@@ -14,6 +14,7 @@ import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as PublicVerifyRouteImport } from './routes/_public/verify'
+import { Route as PublicTransactionsRouteImport } from './routes/_public/transactions'
 import { Route as PublicSearchRouteImport } from './routes/_public/search'
 import { Route as AdminCertificatesIndexRouteImport } from './routes/admin/certificates/index'
 import { Route as AdminCertificatesIdRouteImport } from './routes/admin/certificates/$id'
@@ -43,6 +44,11 @@ const PublicVerifyRoute = PublicVerifyRouteImport.update({
   path: '/verify',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PublicTransactionsRoute = PublicTransactionsRouteImport.update({
+  id: '/_public/transactions',
+  path: '/transactions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PublicSearchRoute = PublicSearchRouteImport.update({
   id: '/_public/search',
   path: '/search',
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
   '/$': typeof SplatRoute
   '/search': typeof PublicSearchRoute
+  '/transactions': typeof PublicTransactionsRoute
   '/verify': typeof PublicVerifyRoute
   '/admin/login': typeof AdminLoginRoute
   '/': typeof PublicIndexRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteRouteWithChildren
   '/$': typeof SplatRoute
   '/search': typeof PublicSearchRoute
+  '/transactions': typeof PublicTransactionsRoute
   '/verify': typeof PublicVerifyRoute
   '/admin/login': typeof AdminLoginRoute
   '/': typeof PublicIndexRoute
@@ -84,6 +92,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRouteWithChildren
   '/$': typeof SplatRoute
   '/_public/search': typeof PublicSearchRoute
+  '/_public/transactions': typeof PublicTransactionsRoute
   '/_public/verify': typeof PublicVerifyRoute
   '/admin/login': typeof AdminLoginRoute
   '/_public/': typeof PublicIndexRoute
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/$'
     | '/search'
+    | '/transactions'
     | '/verify'
     | '/admin/login'
     | '/'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/$'
     | '/search'
+    | '/transactions'
     | '/verify'
     | '/admin/login'
     | '/'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/$'
     | '/_public/search'
+    | '/_public/transactions'
     | '/_public/verify'
     | '/admin/login'
     | '/_public/'
@@ -127,6 +139,7 @@ export interface RootRouteChildren {
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   SplatRoute: typeof SplatRoute
   PublicSearchRoute: typeof PublicSearchRoute
+  PublicTransactionsRoute: typeof PublicTransactionsRoute
   PublicVerifyRoute: typeof PublicVerifyRoute
   PublicIndexRoute: typeof PublicIndexRoute
 }
@@ -166,6 +179,13 @@ declare module '@tanstack/react-router' {
       path: '/verify'
       fullPath: '/verify'
       preLoaderRoute: typeof PublicVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_public/transactions': {
+      id: '/_public/transactions'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof PublicTransactionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_public/search': {
@@ -212,6 +232,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRouteRoute: AdminRouteRouteWithChildren,
   SplatRoute: SplatRoute,
   PublicSearchRoute: PublicSearchRoute,
+  PublicTransactionsRoute: PublicTransactionsRoute,
   PublicVerifyRoute: PublicVerifyRoute,
   PublicIndexRoute: PublicIndexRoute,
 }

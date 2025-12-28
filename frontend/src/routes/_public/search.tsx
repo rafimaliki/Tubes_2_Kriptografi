@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppLogoHeader } from "@/components/app-logo-header";
 
@@ -72,6 +72,15 @@ function SearchPage() {
               Verify
             </button>
           </form>
+        </div>
+
+        <div className="flex justify-center mt-10">
+          <Link
+            to="/transactions"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg transition-colors"
+          >
+            See Transactions
+          </Link>
         </div>
       </div>
     </div>
