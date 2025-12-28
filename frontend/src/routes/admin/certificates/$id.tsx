@@ -14,13 +14,24 @@ export const Route = createFileRoute("/admin/certificates/$id")({
 function CertificateDetailPage() {
   const { id } = Route.useParams();
 
-  const [certificate, setCertificate] = useState<
-    (Certificate & { revokeReason?: string }) | null
-  >(null);
+  const [certificate, setCertificate] = useState<Certificate & { revokeReason?: string; accessUrl?: string } | null>(null);
   const [isRevoking, setIsRevoking] = useState(false);
   const [showRevokeModal, setShowRevokeModal] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   const { authenticated } = useAuthStore();
+
+  const handleCopyAccessUrl = async () => {
+    if (certificate?.accessUrl) {
+      try {
+        await navigator.clipboard.writeText(certificate.accessUrl);
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+      } catch (err) {
+        console.error("Failed to copy:", err);
+      }
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -73,7 +84,7 @@ function CertificateDetailPage() {
             The requested certificate does not exist.
           </p>
           <Link
-            to="/certificates"
+            to="/admin/certificates"
             className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg transition-all duration-200 inline-block"
           >
             Go Home
@@ -88,22 +99,9 @@ function CertificateDetailPage() {
       {authenticated && (
         <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <Link
-              to="/certificates"
-              className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors w-fit"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
+            <Link to="/admin/certificates" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors w-fit">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               Back to Certificates
             </Link>
@@ -172,15 +170,15 @@ function CertificateDetailPage() {
                 </label>
                 <span
                   className={`px-3 py-1 rounded-full font-medium ${
-                    certificate.status === "Valid"
+                    certificate.status === "valid"
                       ? "bg-emerald-500/20 text-emerald-400"
                       : "bg-red-500/20 text-red-400"
                   }`}
                 >
-                  {certificate.status}
+                  {certificate.status.charAt(0).toUpperCase() + certificate.status.slice(1)}
                 </span>
               </div>
-              {certificate.status === "Revoked" && certificate.revokeReason && (
+              {certificate.status === "revoked" && certificate.revokeReason && (
                 <div className="bg-slate-800/60 border border-red-500/30 rounded-lg p-3">
                   <label className="block text-sm font-medium text-red-400 mb-1">
                     Revocation Reason
@@ -200,18 +198,44 @@ function CertificateDetailPage() {
                 {certificate.id}
               </p>
             </div>
+
+            {certificate.accessUrl && (
+              <div>
+                <label className="block text-sm font-medium text-slate-500 mb-2">Access URL</label>
+                <div className="relative flex items-center gap-2 bg-slate-950 px-4 py-3 rounded-lg border border-slate-800">
+                  <p className="text-sm font-mono text-slate-300 flex-1 break-all whitespace-normal">
+                    {certificate.accessUrl}
+                  </p>
+                  <button
+                    onClick={handleCopyAccessUrl}
+                    className="flex-shrink-0 p-2 hover:bg-slate-800 rounded transition-colors"
+                    title="Copy to clipboard"
+                  >
+                    {copySuccess ? (
+                      <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {authenticated && (
             <div className="mt-8 pt-8 border-t border-slate-800 flex items-center justify-center">
               <button
                 onClick={() => setShowRevokeModal(true)}
-                disabled={certificate.status === "Revoked" || isRevoking}
+                disabled={certificate.status === "revoked" || isRevoking}
                 className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-medium rounded-lg transition-all duration-200 shadow-lg shadow-red-900/80 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isRevoking
                   ? "Revoking..."
-                  : certificate.status === "Revoked"
+                  : certificate.status === "revoked"
                     ? "Certificate Revoked"
                     : "Revoke Certificate"}
               </button>
@@ -249,7 +273,7 @@ function CertificateDetailPage() {
 
             setCertificate({
               ...certificate,
-              status: "Revoked",
+              status: "revoked",
               revokeReason: reason,
             });
             setShowRevokeModal(false);

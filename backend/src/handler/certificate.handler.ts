@@ -5,10 +5,12 @@ import CryptoJS from "crypto-js";
 import { db } from "@/db";
 import { ledger } from "@/db/schema";
 import { LedgerUtils } from "@/lib/ledger.utils";
+import { ledgerHandler } from "@/handler/ledger.handler";
 import { and, eq, desc } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 
 const STORAGE_DIR = join(import.meta.dir, "../../storage/certificates");
+const ACCESS_URL_ENCRYPTION_KEY = "BACKEND_SECRET_KEY_FOR_ACCESS_URL_2024";
 
 
 type IssueMetadata = {
@@ -43,9 +45,10 @@ export const certificateHandler = {
       const ownerName = formData.get("ownerName") as string;
       const studyProgram = formData.get("study") as string;
       const issuerAddress = formData.get("issuerAddress") as string;
+      const fileType = formData.get("fileType") as string;
 
 
-      if (!file || !signature || !issuerAddress || !ownerName || !studyProgram) {
+      if (!file || !signature || !issuerAddress || !ownerName || !studyProgram || !fileType) {
         return c.json({ error: "Missing required fields" }, 400);
       }
 
@@ -61,7 +64,7 @@ export const certificateHandler = {
       const encryptedContent = CryptoJS.AES.encrypt(fileBase64, aesKey).toString();
 
 
-      const fileName = `${Date.now()}-${originalFileHash.substring(0, 8)}.enc`;
+      const fileName = `${fileType}-${Date.now()}-${originalFileHash.substring(0, 8)}.enc`;
       await writeFile(join(STORAGE_DIR, fileName), encryptedContent);
 
       const prevHash = await LedgerUtils.getLastHash();
@@ -78,17 +81,20 @@ export const certificateHandler = {
 
       const currentHash = LedgerUtils.calculateHash(prevHash, metadata, signature);
 
+      const accessUrl = `http://localhost:3000/verify?cert_url=${fileName}&aes_key=${encodeURIComponent(
+        aesKey
+      )}&tx_hash=${currentHash}`;
+
+      const encryptedAccessUrl = CryptoJS.AES.encrypt(accessUrl, ACCESS_URL_ENCRYPTION_KEY).toString();
+
       await db.insert(ledger).values({
         previous_hash: prevHash,
         current_hash: currentHash,
         transaction_type: "ISSUE",
         metadata,
         signature,
+        access_url: encryptedAccessUrl,
       });
-
-      const accessUrl = `${c.req.header("origin")}/verify?file=${fileName}&key=${encodeURIComponent(
-        aesKey
-      )}&tx=${currentHash}`;
 
       return c.json(
         {
@@ -114,12 +120,12 @@ export const certificateHandler = {
         return c.json({ error: "Missing required revocation parameters" }, 400);
       }
 
-      const exists = await db
-        .select({ id: ledger.id })
+      const [existingLedger] = await db
+        .select({ id: ledger.id, access_url: ledger.access_url })
         .from(ledger)
         .where(eq(ledger.current_hash, target_tx_hash));
 
-      if (!exists.length) {
+      if (!existingLedger) {
         return c.json({ error: "Target certificate not found" }, 404);
       }
 
@@ -141,6 +147,7 @@ export const certificateHandler = {
         transaction_type: "REVOKE",
         metadata,
         signature,
+        access_url: existingLedger.access_url,
       });
 
       return c.json({
@@ -173,7 +180,16 @@ export const certificateHandler = {
         return c.json({ error: "Access denied" }, 403);
       }
 
-      return new Response(file);
+      const origin = c.req.header("origin") || "http://localhost:3000";
+      
+      return new Response(file, {
+        headers: {
+          "Content-Type": "application/octet-stream",
+          "Content-Disposition": `attachment; filename="${fileName}"`,
+          "Access-Control-Allow-Origin": origin,
+          "Access-Control-Allow-Credentials": "true",
+        },
+      });
     } catch {
       return c.json({ error: "Download failed" }, 500);
     }
@@ -197,19 +213,30 @@ export const certificateHandler = {
         .filter(Boolean)
     );
 
-    return c.json(
-      issues.map((r) => {
+    const certificatesWithStatus = await Promise.all(
+      issues.map(async (r) => {
         const metadata = r.metadata as IssueMetadata;
+
+        let status: "valid" | "invalid" | "revoked" = "valid";
+        
+        if (revokedTargets.has(r.current_hash)) {
+          status = "revoked";
+        } else {
+          const isValid = await ledgerHandler.validateTransaction(r.current_hash);
+          status = isValid ? "valid" : "invalid";
+        }
 
         return {
           id: r.current_hash,
           ownerName: metadata.ownerName,
           study: metadata.studyProgram,
           issueDate: metadata.timestamp,
-          status: revokedTargets.has(r.current_hash) ? "Revoked" : "Valid",
+          status,
         };
       })
     );
+
+    return c.json(certificatesWithStatus);
   },
 
   getById: async (c: Context) => {
@@ -235,15 +262,39 @@ export const certificateHandler = {
     }
 
     const issue = rows[0];
+    if (!issue) {
+      return c.json({ error: "Certificate not found" }, 404);
+    }
+
     const metadata = issue!.metadata as any;
+
+    let decryptedAccessUrl = "";
+    if (issue.access_url) {
+      try {
+        const bytes = CryptoJS.AES.decrypt(issue.access_url, ACCESS_URL_ENCRYPTION_KEY);
+        decryptedAccessUrl = bytes.toString(CryptoJS.enc.Utf8);
+      } catch (error) {
+        console.error("Failed to decrypt access URL:", error);
+      }
+    }
+
+    let status: "valid" | "invalid" | "revoked" = "valid";
+    
+    if (revoke.length) {
+      status = "revoked";
+    } else {
+      const isValid = await ledgerHandler.validateTransaction(id);
+      status = isValid ? "valid" : "invalid";
+    }
 
     return c.json({
       id,
       ownerName: metadata.ownerName,
       study: metadata.studyProgram,
       issueDate: metadata.timestamp,
-      status: revoke.length ? "Revoked" : "Valid",
+      status,
       revokeReason: revokeMetadata?.reason || null,
+      accessUrl: decryptedAccessUrl,
     });
   },
 
