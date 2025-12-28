@@ -11,7 +11,7 @@ interface UploadCertificateModalProps {
 export function UploadCertificateModal({
   isOpen,
   onClose,
-  onUploaded
+  onUploaded,
 }: UploadCertificateModalProps) {
   const [ownerName, setOwnerName] = useState("");
   const [study, setStudy] = useState("");
@@ -50,7 +50,6 @@ export function UploadCertificateModal({
         return;
       }
 
-
       const buffer = await file.arrayBuffer();
       const hash = await crypto.subtle.digest("SHA-256", buffer);
       const hashBase64 = btoa(String.fromCharCode(...new Uint8Array(hash)));
@@ -67,7 +66,6 @@ export function UploadCertificateModal({
 
       onUploaded?.();
       onClose();
-
     } catch (err) {
       console.error("Upload error:", err);
       alert("Upload failed");
@@ -92,7 +90,7 @@ export function UploadCertificateModal({
         <div className="flex items-center justify-between p-6 border-b border-slate-800">
           <h2 className="text-xl font-bold text-white">Upload Certificate</h2>
           <button
-            title= "Close"
+            title="Close"
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors"
           >
@@ -121,7 +119,9 @@ export function UploadCertificateModal({
             </label>
 
             <div
-              onClick={() => document.getElementById("cert-file-input")?.click()}
+              onClick={() =>
+                document.getElementById("cert-file-input")?.click()
+              }
               onDragOver={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -195,8 +195,6 @@ export function UploadCertificateModal({
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             />
           </div>
-
-
           {/* Owner */}
           <div>
             <label
@@ -215,14 +213,13 @@ export function UploadCertificateModal({
               required
             />
           </div>
-
-          {/* Course */}
+          {/* Study Program */}
           <div>
             <label
               htmlFor="study"
               className="block text-sm font-medium text-slate-300 mb-2"
             >
-              Study/Course
+              Study Program
             </label>
             <input
               type="text"
@@ -230,11 +227,10 @@ export function UploadCertificateModal({
               value={study}
               onChange={(e) => setStudy(e.target.value)}
               className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
-              placeholder="Advanced Web Development"
+              placeholder="Informatics Engineering"
               required
             />
           </div>
-
           {/* Actions */}
           <div className="flex gap-3 pt-2">
             <button
