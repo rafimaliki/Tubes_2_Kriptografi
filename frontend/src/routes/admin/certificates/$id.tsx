@@ -170,15 +170,15 @@ function CertificateDetailPage() {
                 </label>
                 <span
                   className={`px-3 py-1 rounded-full font-medium ${
-                    certificate.status === "Valid"
+                    certificate.status === "valid"
                       ? "bg-emerald-500/20 text-emerald-400"
                       : "bg-red-500/20 text-red-400"
                   }`}
                 >
-                  {certificate.status}
+                  {certificate.status.charAt(0).toUpperCase() + certificate.status.slice(1)}
                 </span>
               </div>
-              {certificate.status === "Revoked" && certificate.revokeReason && (
+              {certificate.status === "revoked" && certificate.revokeReason && (
                 <div className="bg-slate-800/60 border border-red-500/30 rounded-lg p-3">
                   <label className="block text-sm font-medium text-red-400 mb-1">
                     Revocation Reason
@@ -230,12 +230,12 @@ function CertificateDetailPage() {
             <div className="mt-8 pt-8 border-t border-slate-800 flex items-center justify-center">
               <button
                 onClick={() => setShowRevokeModal(true)}
-                disabled={certificate.status === "Revoked" || isRevoking}
+                disabled={certificate.status === "revoked" || isRevoking}
                 className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-medium rounded-lg transition-all duration-200 shadow-lg shadow-red-900/80 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isRevoking
                   ? "Revoking..."
-                  : certificate.status === "Revoked"
+                  : certificate.status === "revoked"
                     ? "Certificate Revoked"
                     : "Revoke Certificate"}
               </button>
@@ -273,7 +273,7 @@ function CertificateDetailPage() {
 
             setCertificate({
               ...certificate,
-              status: "Revoked",
+              status: "revoked",
               revokeReason: reason,
             });
             setShowRevokeModal(false);

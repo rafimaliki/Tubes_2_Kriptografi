@@ -139,12 +139,14 @@ function CertificatesPage() {
                         </h3>
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            certificate.status === "Valid"
+                            certificate.status === "valid"
                               ? "bg-emerald-500/20 text-emerald-400"
-                              : "bg-red-500/20 text-red-400"
+                              : certificate.status === "revoked"
+                              ? "bg-red-500/20 text-red-400"
+                              : "bg-orange-500/20 text-orange-400"
                           }`}
                         >
-                          {certificate.status}
+                          {certificate.status.charAt(0).toUpperCase() + certificate.status.slice(1)}
                         </span>
                       </div>
                       <p className="text-slate-400 mb-2">{certificate.study}</p>

@@ -5,6 +5,7 @@ import CryptoJS from "crypto-js";
 import { db } from "@/db";
 import { ledger } from "@/db/schema";
 import { LedgerUtils } from "@/lib/ledger.utils";
+import { ledgerHandler } from "@/handler/ledger.handler";
 import { and, eq, desc } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 
@@ -212,19 +213,30 @@ export const certificateHandler = {
         .filter(Boolean)
     );
 
-    return c.json(
-      issues.map((r) => {
+    const certificatesWithStatus = await Promise.all(
+      issues.map(async (r) => {
         const metadata = r.metadata as IssueMetadata;
+
+        let status: "valid" | "invalid" | "revoked" = "valid";
+        
+        if (revokedTargets.has(r.current_hash)) {
+          status = "revoked";
+        } else {
+          const isValid = await ledgerHandler.validateTransaction(r.current_hash);
+          status = isValid ? "valid" : "invalid";
+        }
 
         return {
           id: r.current_hash,
           ownerName: metadata.ownerName,
           study: metadata.studyProgram,
           issueDate: metadata.timestamp,
-          status: revokedTargets.has(r.current_hash) ? "Revoked" : "Valid",
+          status,
         };
       })
     );
+
+    return c.json(certificatesWithStatus);
   },
 
   getById: async (c: Context) => {
@@ -266,12 +278,21 @@ export const certificateHandler = {
       }
     }
 
+    let status: "valid" | "invalid" | "revoked" = "valid";
+    
+    if (revoke.length) {
+      status = "revoked";
+    } else {
+      const isValid = await ledgerHandler.validateTransaction(id);
+      status = isValid ? "valid" : "invalid";
+    }
+
     return c.json({
       id,
       ownerName: metadata.ownerName,
       study: metadata.studyProgram,
       issueDate: metadata.timestamp,
-      status: revoke.length ? "Revoked" : "Valid",
+      status,
       revokeReason: revokeMetadata?.reason || null,
       accessUrl: decryptedAccessUrl,
     });
