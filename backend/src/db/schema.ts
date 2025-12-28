@@ -21,6 +21,9 @@ export const ledger = pgTable("ledger", {
   
   // Digital signature of the Issuer (ECDSA) for authenticity
   signature: text("signature").notNull(),
+
+  // Access URL for certificate in website
+  access_url: text("access_url").notNull(),
   
   created_at: timestamp("created_at").defaultNow(),
 });

@@ -56,12 +56,21 @@ export function UploadCertificateModal({
 
       const signature = await Crypto.signNonce(hashBase64, user.private_key);
 
+      let fileType = "txt";
+      const fileExt = file.name.split('.').pop()?.toLowerCase();
+      if (fileExt === "pdf") {
+        fileType = "pdf";
+      } else if (["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(fileExt || "")) {
+        fileType = "img";
+      }
+
       await CertificateAPI.issue({
         file,
         ownerName,
         study,
         signature,
         issuerAddress: user.name,
+        fileType,
       });
 
       onUploaded?.();
@@ -181,7 +190,7 @@ export function UploadCertificateModal({
                   <p className="text-slate-400 text-sm">
                     Click to upload or drag and drop
                   </p>
-                  <p className="text-slate-600 text-xs mt-1">PDF or TXT</p>
+                  <p className="text-slate-600 text-xs mt-1">PDF, TXT, or Images (JPG, PNG, etc.)</p>
                 </>
               )}
             </div>
@@ -190,7 +199,7 @@ export function UploadCertificateModal({
               title="Upload certificate file"
               id="cert-file-input"
               type="file"
-              accept=".pdf,.txt"
+              accept=".pdf,.txt,.jpg,.jpeg,.png,.gif,.bmp,.webp"
               className="hidden"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             />
