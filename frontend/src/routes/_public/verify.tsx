@@ -3,6 +3,7 @@ import { AppTopbar } from "@/components/app-topbar";
 import { CertificateAPI } from "@/api/certificate.api";
 import { useState, useEffect } from "react";
 import CryptoJS from "crypto-js";
+import { FileWatermark } from "@/lib/FileWatermark";
 
 type VerifySearch = {
   cert_url?: string;
@@ -112,15 +113,22 @@ function RouteComponent() {
 
           // Create blob from decrypted data
           const decryptedBlob = new Blob([bytes], { type: mimeType });
-          const url = window.URL.createObjectURL(decryptedBlob);
-          objectUrl = url;
-
+          
           // Remove .enc extension and add appropriate file extension
           const baseFileName = cert_url.replace('.enc', '').replace(/^(pdf|txt|img)-/, '');
           const fileName = baseFileName + fileExtension;
 
+          // Build verification URL
+          const verificationUrl = `${window.location.origin}/verify?cert_url=${encodeURIComponent(cert_url)}&aes_key=${encodeURIComponent(aes_key)}&tx_hash=${encodeURIComponent(tx_hash || '')}`;
+
+          // Add watermark to the file
+          const watermarkedBlob = await FileWatermark.addWatermark(decryptedBlob, fileType, verificationUrl);
+          
+          const url = window.URL.createObjectURL(watermarkedBlob);
+          objectUrl = url;
+
           setDecryptedData({
-            blob: decryptedBlob,
+            blob: watermarkedBlob,
             fileType,
             fileName,
             url,
@@ -128,7 +136,7 @@ function RouteComponent() {
 
           // If it's a text file, read the content
           if (fileType === "txt") {
-            const text = await decryptedBlob.text();
+            const text = await watermarkedBlob.text();
             setTextContent(text);
           }
         } catch (base64Error) {
