@@ -88,12 +88,7 @@ function RouteComponent() {
                             {transaction.metadata.fileName}
                           </p>
                         </div>
-                        <div>
-                          <p className="text-slate-400">Issuer:</p>
-                          <p className="text-white">
-                            {transaction.metadata.issuer}
-                          </p>
-                        </div>
+
                         <div>
                           <p className="text-slate-400">File Hash:</p>
                           <p className="text-white font-mono text-xs break-all">
@@ -122,12 +117,6 @@ function RouteComponent() {
                           </p>
                           <p className="text-white font-mono text-xs break-all">
                             {transaction.metadata.target_cert_id}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-slate-400">Issuer:</p>
-                          <p className="text-white">
-                            {transaction.metadata.issuer}
                           </p>
                         </div>
                       </div>
