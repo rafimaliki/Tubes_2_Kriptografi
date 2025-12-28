@@ -6,6 +6,7 @@ import { Crypto } from "@/lib/Crypto";
 import { RevokeModal } from "@/components/revoke-modal";
 import { useAuthStore } from "@/store/auth.store";
 import { formatDate } from "@/lib/Date";
+import { AppTopbar } from "@/components/app-topbar";
 
 export const Route = createFileRoute("/admin/certificates/$id")({
   component: CertificateDetailPage,
@@ -14,7 +15,9 @@ export const Route = createFileRoute("/admin/certificates/$id")({
 function CertificateDetailPage() {
   const { id } = Route.useParams();
 
-  const [certificate, setCertificate] = useState<Certificate & { revokeReason?: string; accessUrl?: string } | null>(null);
+  const [certificate, setCertificate] = useState<
+    (Certificate & { revokeReason?: string; accessUrl?: string }) | null
+  >(null);
   const [isRevoking, setIsRevoking] = useState(false);
   const [showRevokeModal, setShowRevokeModal] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -96,18 +99,7 @@ function CertificateDetailPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
-      {authenticated && (
-        <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <Link to="/admin/certificates" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors w-fit">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Back to Certificates
-            </Link>
-          </div>
-        </header>
-      )}
+      <AppTopbar title="Back" to="/admin/certificates" />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-2xl p-8 sm:p-12 shadow-2xl">
@@ -175,7 +167,8 @@ function CertificateDetailPage() {
                       : "bg-red-500/20 text-red-400"
                   }`}
                 >
-                  {certificate.status.charAt(0).toUpperCase() + certificate.status.slice(1)}
+                  {certificate.status.charAt(0).toUpperCase() +
+                    certificate.status.slice(1)}
                 </span>
               </div>
               {certificate.status === "revoked" && certificate.revokeReason && (
@@ -201,7 +194,9 @@ function CertificateDetailPage() {
 
             {certificate.accessUrl && (
               <div>
-                <label className="block text-sm font-medium text-slate-500 mb-2">Access URL</label>
+                <label className="block text-sm font-medium text-slate-500 mb-2">
+                  Access URL
+                </label>
                 <div className="relative flex items-center gap-2 bg-slate-950 px-4 py-3 rounded-lg border border-slate-800">
                   <p className="text-sm font-mono text-slate-300 flex-1 break-all whitespace-normal">
                     {certificate.accessUrl}
@@ -212,12 +207,32 @@ function CertificateDetailPage() {
                     title="Copy to clipboard"
                   >
                     {copySuccess ? (
-                      <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <svg
+                        className="w-5 h-5 text-emerald-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
                     ) : (
-                      <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      <svg
+                        className="w-5 h-5 text-slate-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        />
                       </svg>
                     )}
                   </button>
