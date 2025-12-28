@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 let nonce: string | null = null;
 
 export const NonceRepository = {
@@ -6,7 +8,7 @@ export const NonceRepository = {
   },
 
   generate: () => {
-    nonce = "randomly-generated-nonce";
+    nonce = crypto.randomBytes(16).toString("hex");
     return nonce;
   },
 

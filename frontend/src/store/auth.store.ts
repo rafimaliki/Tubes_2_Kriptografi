@@ -62,8 +62,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
       // 2) sign nonce
       const signed_nonce = await Crypto.signNonce(nonce, private_key);
 
-      console.log("Signed Nonce:", signed_nonce);
-
       // 3) kirim login request dengan signed nonce
       const login_res = await AuthAPI.login(signed_nonce);
 
