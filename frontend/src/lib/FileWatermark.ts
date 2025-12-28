@@ -1,4 +1,13 @@
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+// import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import {
+  PDFDocument,
+  StandardFonts,
+  rgb,
+  PDFName,
+  PDFArray,
+  PDFNumber,
+  PDFString,
+} from "pdf-lib";
 
 export class FileWatermark {
     static async addTextWatermark(blob: Blob, verificationUrl: string): Promise<Blob> {
@@ -11,52 +20,96 @@ export class FileWatermark {
         try {
             const arrayBuffer = await blob.arrayBuffer();
             const pdfDoc = await PDFDocument.load(arrayBuffer);
-      
+
             const page = pdfDoc.addPage();
             const { width, height } = page.getSize();
-      
+
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
             const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-      
-            page.drawText('Certificate Verification', {
-                x: 50,
-                y: height - 100,
-                size: 24,
-                font: boldFont,
+
+            page.drawText("Certificate Verification", {
+            x: 50,
+            y: height - 100,
+            size: 24,
+            font: boldFont,
             color: rgb(0.15, 0.3, 0.6),
             });
-      
-            page.drawText('This certificate can be verified at:', {
-                x: 50,
-                y: height - 150,
-                size: 14,
-                font: font,
-                color: rgb(0.2, 0.2, 0.2),
+
+            page.drawText("This certificate can be verified at the following URL:", {
+            x: 50,
+            y: height - 150,
+            size: 14,
+            font,
+            color: rgb(0.2, 0.2, 0.2),
             });
-      
-            const maxWidth = width - 100;
-            const fontSize = 12;
-            const urlLines = this.splitTextToFit(verificationUrl, font, fontSize, maxWidth);
-      
-            let yPosition = height - 180;
-            urlLines.forEach((line) => {
-                page.drawText(line, {
-                    x: 50,
-                    y: yPosition,
-                    size: fontSize,
-                    font: font,
-                    color: rgb(0, 0.4, 0.8),
-                });
-            yPosition -= 20;
+
+            const linkLabel = "Verification URL";
+            const linkFontSize = 14;
+            const linkX = 50;
+            const linkY = height - 180;
+
+            page.drawText(linkLabel, {
+            x: linkX,
+            y: linkY,
+            size: linkFontSize,
+            font,
+            color: rgb(0, 0.4, 0.8),
             });
-      
+
+            const textWidth = font.widthOfTextAtSize(linkLabel, linkFontSize);
+            page.drawLine({
+            start: { x: linkX, y: linkY - 2 },
+            end: { x: linkX + textWidth, y: linkY - 2 },
+            thickness: 1,
+            color: rgb(0, 0.4, 0.8),
+            });
+
+            const context = pdfDoc.context;
+
+            const textHeight = font.heightAtSize(linkFontSize);
+
+            const rect = PDFArray.withContext(context);
+            rect.push(PDFNumber.of(linkX));
+            rect.push(PDFNumber.of(linkY));
+            rect.push(PDFNumber.of(linkX + textWidth));
+            rect.push(PDFNumber.of(linkY + textHeight));
+
+            const border = PDFArray.withContext(context);
+            border.push(PDFNumber.of(0));
+            border.push(PDFNumber.of(0));
+            border.push(PDFNumber.of(0));
+
+            const action = context.obj({
+            S: PDFName.of("URI"),
+            URI: PDFString.of(verificationUrl),
+            });
+
+            const annotation = context.obj({
+            Type: PDFName.of("Annot"),
+            Subtype: PDFName.of("Link"),
+            Rect: rect,
+            Border: border,
+            A: action,
+            });
+
+            const annotationRef = context.register(annotation);
+
+            page.node.addAnnot(annotationRef);
+
             const pdfBytes = await pdfDoc.save();
-            return new Blob([pdfBytes], { type: 'application/pdf' });
+
+            const ab = pdfBytes.buffer.slice(
+            pdfBytes.byteOffset,
+            pdfBytes.byteOffset + pdfBytes.byteLength
+            );
+
+            return new Blob([ab], { type: "application/pdf" });
         } catch (error) {
-            console.error('Failed to add PDF watermark:', error);
+            console.error("Failed to add PDF watermark:", error);
             return blob;
         }
     }
+
 
     static async addImageWatermark(blob: Blob, verificationUrl: string): Promise<Blob> {
         return new Promise((resolve) => {
